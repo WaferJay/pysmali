@@ -1,5 +1,7 @@
 # This file is part of pysmali's Smali API
 # Copyright (C) 2023-2024 MatrixEditor
+from smali.base import RegArgs
+
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -219,7 +221,7 @@ class MethodVisitor(VisitorBase):
         if self.delegate:
             self.delegate.visit_block(name)
 
-    def visit_invoke(self, inv_type: str, args: list, owner: str, method: str) -> None:
+    def visit_invoke(self, inv_type: str, args: RegArgs, owner: str, method: str) -> None:
         """Handles an 'invoke-' statement.
 
         This method is called whenever an 'invoke-' statement hias been

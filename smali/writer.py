@@ -19,7 +19,7 @@ to procude classes, method, fields and annotations.
 """
 
 from smali.visitor import ClassVisitor, MethodVisitor, FieldVisitor, AnnotationVisitor
-from smali.base import AccessType, Token
+from smali.base import AccessType, Token, RegArgs
 from smali.reader import SupportsCopy, SmaliReader
 from smali import opcode
 
@@ -408,11 +408,11 @@ class _SmaliMethodWriter(MethodVisitor, _ContainsCodeCache):
             f"return{ret_type} {' '.join(args)}", custom_indent=self.cache.indent + 1
         )
 
-    def visit_invoke(self, inv_type: str, args: list, owner: str, method: str) -> None:
+    def visit_invoke(self, inv_type: str, args: RegArgs, owner: str, method: str) -> None:
         self.cache.apply_code_cache(True)
         super().visit_invoke(inv_type, args, owner, method)
         self.cache.add(
-            "invoke-%s { %s }, %s->%s" % (inv_type, ", ".join(args), owner, method),
+            "invoke-%s { %s }, %s->%s" % (inv_type, args, owner, method),
             custom_indent=self.cache.indent + 1,
             end="\n",
         )

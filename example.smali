@@ -152,6 +152,8 @@
 
     invoke-virtual {v0, v1}, Lcom/github/javaparser/printer/PrettyPrinterConfiguration;->a(Z)Lcom/github/javaparser/printer/PrettyPrinterConfiguration;
 
+    invoke-virtual/range {v0 .. v1}, Lcom/github/javaparser/printer/PrettyPrinterConfiguration;->a(Z)Lcom/github/javaparser/printer/PrettyPrinterConfiguration;
+
     sput-object v0, Lcom/github/javaparser/ast/Node;->c:Lcom/github/javaparser/printer/PrettyPrinterConfiguration;
 
     .line 4

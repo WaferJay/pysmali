@@ -28,7 +28,7 @@ from smali.visitor import (
     AnnotationVisitor,
     MethodVisitor,
 )
-from smali.base import AccessType, Line, Token, SVMType, smali_value, is_type_descriptor
+from smali.base import AccessType, Line, Token, SVMType, smali_value, is_type_descriptor, RegRange, RegList
 from smali.opcode import RETURN, GOTO
 
 
@@ -826,14 +826,19 @@ class SmaliReader:
         sub_ins = (
             "" if "-" not in instruction else instruction[instruction.find("-") + 1 :]
         )
+        is_range_ins = instruction.endswith("/range")
         if instruction.startswith("invoke"):
             # Invoke instructions will be handles separately as they have
             # as special structure
             cleaned = self.line.cleaned
-            args = [
-                x.strip()
-                for x in cleaned[cleaned.find("{") + 1 : cleaned.find("}")].split(",")
-            ]
+            if is_range_ins:
+                from_reg, to_reg = cleaned[cleaned.find("{") + 1 : cleaned.find("}")].split('..')
+                args = RegRange(from_reg, to_reg)
+            else:
+                args = RegList([
+                    x.strip()
+                    for x in cleaned[cleaned.find("{") + 1 : cleaned.find("}")].split(",")
+                ])
 
             # Maybe replace this with a method call in Line
             method_sig = self.line.last()

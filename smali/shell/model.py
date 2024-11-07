@@ -28,6 +28,7 @@ from smali import (
     ClassVisitor,
     FieldVisitor,
     SmaliReader,
+    RegArgs,
 )
 from smali.bridge import (
     Frame,
@@ -145,7 +146,7 @@ class DefaultVisitor(MethodVisitor, ClassVisitor):
         else:
             self.visit_instruction("return", args)
 
-    def visit_invoke(self, inv_type: str, args: list, owner: str, method: str) -> None:
+    def visit_invoke(self, inv_type: str, args: RegArgs, owner: str, method: str) -> None:
         if inv_type:
             self.visit_instruction(
                 f"invoke-{inv_type}", [inv_type, args, owner, method]

@@ -31,6 +31,9 @@ __all__ = [
     "is_type_descriptor",
     "Signature",
     "SVMType",
+    "RegArgs",
+    "RegList",
+    "RegRange",
 ]
 
 
@@ -680,6 +683,108 @@ class SVMType:
         :rtype: str
         """
         return self.pretty_name.split(".")[-1]
+
+
+class RegArgs:
+
+    def __contains__(self, item):
+        raise NotImplementedError()
+
+    def __getitem__(self, item):
+        raise NotImplementedError()
+
+    def __iter__(self):
+        raise NotImplementedError()
+
+    def __str__(self):
+        raise NotImplementedError()
+
+    def to_string(self, brace=True):
+        if brace:
+            return '{' + str(self) + '}'
+        else:
+            return str(self)
+
+
+class RegList(RegArgs):
+
+    def __init__(self, regs):
+        self.reg_list = [reg.strip() for reg in regs]
+        assert self.reg_list
+
+    def __contains__(self, item):
+        if not isinstance(item, str):
+            return False
+        item = item.strip()
+        return item in self.reg_list
+
+    def __getitem__(self, item):
+        return self.reg_list[item]
+
+    def __len__(self):
+        return len(self.reg_list)
+
+    def __iter__(self):
+        return iter(self.reg_list)
+
+    def __eq__(self, other):
+        return (isinstance(other, RegList)
+                and self.reg_list == other.reg_list)
+
+    def __hash__(self):
+        return hash(self.reg_list)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.reg_list})'
+
+    def __str__(self):
+        return ', '.join(self.reg_list)
+
+
+class RegRange(RegArgs):
+
+    def __init__(self, from_reg, to_reg):
+        self.from_reg = from_reg.strip()
+        self.to_reg = to_reg.strip()
+        self.reg_type = self.from_reg[0]
+        self._from_reg_num = int(self.from_reg[1:])
+        self._to_reg_num = int(self.to_reg[1:])
+
+    def __contains__(self, item):
+        if not isinstance(item, str):
+            return False
+        item = item.strip()
+        reg_type = item[0]
+        reg_num = int(item[1:])
+        return self.reg_type == reg_type and self._from_reg_num <= reg_num <= self._to_reg_num
+
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self.reg_type + str(self._from_reg_num + item)
+        elif isinstance(item, tuple):
+            return [self.__getitem__(i) for i in item]
+        elif isinstance(item, slice):
+            raise TypeError('indices must be integers or tuple, not slice')
+
+    def __len__(self):
+        return self._to_reg_num - self._from_reg_num + 1
+
+    def __iter__(self):
+        return (self.reg_type + str(i) for i in range(self._from_reg_num, self._to_reg_num + 1))
+
+    def __eq__(self, other):
+        return (isinstance(other, RegRange)
+                and self.from_reg == other.from_reg
+                and self.to_reg == other.to_reg)
+
+    def __hash__(self):
+        return hash((self.from_reg, self.to_reg))
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.from_reg}, {self.to_reg})'
+
+    def __str__(self):
+        return self.from_reg + ' .. ' + self.to_reg
 
 
 def smali_value(value: str) -> int | float | str | SVMType | bool:
